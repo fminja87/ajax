@@ -20,3 +20,6 @@ Route::get('/', function () {
 
 Route::get('teacher/all',[TeacherController::class,'index']);
 Route::post('/teacher/store/',[TeacherController::class,'create']);
+Route::get('/teacher/edit/{id?}',[TeacherController::class,'edit']);
+Route::post('/teacher/update/{id?}',[TeacherController::class,'update']);
+Route::post('/teacher/delete/{id?}',[TeacherController::class,'destroy']);

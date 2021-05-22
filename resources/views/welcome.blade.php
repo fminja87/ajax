@@ -85,8 +85,9 @@
                             <label for="exampleInputEmail1" class="form-label">Institute</label>
                             <input type="text" class="form-control form-data" name="institute" id="institute" placeholder="Institute">
                         </div>
+                        <input type="hidden" name="id" id="id">
                         <button type="submit" class="btn btn-primary" id="addButton" onclick="addData()">Add</button>
-                        <button type="submit" class="btn btn-primary" id="updateButton">Update</button>
+                        <button type="submit" class="btn btn-primary" id="updateButton" onclick="updateTeacher()">Update</button>
                     </div>
                 </div>
             </div>
@@ -101,6 +102,8 @@
 <script src="{{ asset('vendor/magnific-popup/jquery.magnific-popup.min.js') }}"></script>
 <script src="{{ asset('vendor/owl-carousel/owl.carousel.min.js') }}"></script>
 <script src="{{ asset('js/main.min.js') }}"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
         $('#addHeader').show();
         $('#updateHeader').hide();
@@ -127,8 +130,8 @@
                         data = data + "<td>"+value.title+"</td>"
                         data = data + "<td>"+value.institute+"</td>"
                         data = data + "<td>"
-                        data = data + "<button type='button' class='btn btn-sm btn-success'>Edit</button>"
-                        data = data + "<button type='button' class='btn btn-sm btn-danger'>Delete</button>"
+                        data = data + "<button type='button' class='btn btn-sm btn-success' onclick='editData("+value.id+")'>Edit</button>"
+                        data = data + "<button type='button' class='btn btn-sm btn-danger' onclick='deleteData("+value.id+")'>Delete</button>"
                         data = data + "</td>"
                         data = data + "</tr>"
                     })
@@ -157,7 +160,112 @@
                 success: function (data) {
                     allData();
                     clearData();
-                    console.log(data.message);
+                    const Msg = Swal.mixin({
+                        position: 'top-end',
+                        toast: true,
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 2500
+                    })
+
+                    Msg.fire({
+                        type: 'success',
+                        title: data.message,
+                    })
+                }
+            })
+        }
+
+        function editData(id) {
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "/teacher/edit/"+id,
+                success: function (data) {
+                    $('#addHeader').hide();
+                    $('#updateHeader').show();
+                    $('#addButton').hide();
+                    $('#updateButton').show();
+                    $('#id').val(data.id);
+                    $('#name').val(data.name);
+                    $('#title').val(data.title);
+                    $('#institute').val(data.institute);
+                }
+            })
+        }
+
+        function updateTeacher(){
+
+            var id =  $('#id').val();
+            var name =  $('#name').val();
+            var title =  $('#title').val();
+            var institute =  $('#institute').val();
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: {
+                    name:name,
+                    title:title,
+                    institute:institute
+                },
+                url: "/teacher/update/"+id,
+                success: function (data) {
+                    allData()
+                    clearData()
+                    $('#addHeader').show();
+                    $('#updateHeader').hide();
+                    $('#addButton').show();
+                    $('#updateButton').hide();
+
+                    const Msg = Swal.mixin({
+                        position: 'top-end',
+                        toast: true,
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 2500
+                    })
+
+                    Msg.fire({
+                        type: 'success',
+                        title: data.message,
+                    })
+                }
+            })
+        }
+
+        function deleteData(id){
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        url: "teacher/delete/"+id,
+                        success: function (data) {
+                            allData();
+                            Swal.fire(
+                                'Deleted!',
+                                'Your file has been deleted.',
+                                'success'
+                            )
+                        }
+                    })
+                }
+                else {
+                    Swal.fire(
+                        'Cancelled!',
+                        'Delete process cancelled.',
+                        'info'
+                    )
                 }
             })
         }

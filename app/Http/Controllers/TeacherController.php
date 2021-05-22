@@ -25,4 +25,34 @@ class TeacherController extends Controller
 
         return response()->json(['message'=>'Teacher data saved successful']);
     }
+
+    public function edit($id): \Illuminate\Http\JsonResponse
+    {
+
+        $teacher = Teacher::findOrfail($id);
+
+        return response()->json($teacher);
+
+    }
+
+    public function update(Request $request,$id): \Illuminate\Http\JsonResponse
+    {
+
+
+        $data = Teacher::findOrfail($id)->update([
+            'name'=> $request->name,
+            'title' => $request->title,
+            'institute' => $request->institute
+        ]);
+
+        return response()->json(['message'=>'Teacher data updated successful']);
+    }
+
+    public function destroy($id): \Illuminate\Http\JsonResponse
+    {
+
+        $data = Teacher::findOrfail($id)->delete();
+
+        return response()->json(['message'=>'Teacher deleted successful']);
+    }
 }
